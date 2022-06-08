@@ -4,9 +4,12 @@ pragma solidity 0.8.12;
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/interfaces/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./IWhitelistToken.sol";
 
 contract Distributor is Ownable {
+    using SafeERC20 for IERC20;
+
     struct Income {
         bool   present;
         uint16 snapshotIdx; // == snapshotId - 1
@@ -92,18 +95,21 @@ contract Distributor is Ownable {
         IERC20 coin = IERC20(_coinAddress);
         uint48 coinAmount = uint48(balance) * 10_000;
         require(coin.balanceOf(address(this)) >= coinAmount, "Distributor: Contract doesn't have sufficient fund");
-        coin.transfer(tokenHolder, coinAmount);
 
         // Update lifetime amount withdrew
         _withdrawals[tokenHolder] += balance;
         emit Withdrawal(tokenHolder, balance);
+
+        // Transfer coins to token holder
+        coin.safeTransfer(tokenHolder, coinAmount);
+
     }
 
     // Transfer funds out of the contract to its owner
     function _transferToOwner(uint256 amount) internal {
         IERC20 coin = IERC20(_coinAddress);
         require(coin.balanceOf(address(this)) >= amount, "Distributor: Contract doesn't have sufficient fund");
-        coin.transfer(owner(), amount);
+        coin.safeTransfer(owner(), amount);
     }
 
     function transferToOwner(uint256 amount) external onlyOwner {

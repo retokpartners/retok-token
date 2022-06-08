@@ -21,7 +21,7 @@ contract WhitelistToken is IERC20, IERC1404, Ownable, AccessControl, ERC20Snapsh
     uint8 private constant REPLACE = 1;
     uint8 private constant OTHER = 2;
 
-    constructor(string memory name, string memory symbol) ERC20(name,symbol) {
+    constructor(string memory _name, string memory _symbol) ERC20(_name,_symbol) {
         _grantRole(DEFAULT_ADMIN_ROLE, Ownable.owner());
     }
 
