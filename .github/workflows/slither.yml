@@ -23,7 +23,6 @@ jobs:
       id: slither
       with:
         node-version: 16
-        target: contracts
         sarif: results.sarif
 
     - name: Upload SARIF file

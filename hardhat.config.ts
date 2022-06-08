@@ -4,7 +4,7 @@ import { BigNumber } from "ethers"
 import "@nomiclabs/hardhat-waffle"
 import '@nomiclabs/hardhat-etherscan'
 import 'hardhat-abi-exporter'
-import { APIKEY, TESTNETACCOUNT, MAINNETACCOUNT } from './.env.json'
+import { APIKEY, TESTNETACCOUNT, MAINNETACCOUNT } from './.env.tests.json'
 import "hardhat-interface-generator";
 
 const FORK_FUJI = false
