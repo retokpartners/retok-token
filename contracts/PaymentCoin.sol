@@ -10,7 +10,7 @@ contract PaymentCoin is IERC20, ERC20 {
   constructor(string memory _name, string memory _symbol) ERC20(_name,_symbol) {
   }
 
-  function mintTo(address to, uint256 amount) public {
+  function mintTo(address to, uint256 amount) external   {
     super._mint(to, amount);
   }
 }

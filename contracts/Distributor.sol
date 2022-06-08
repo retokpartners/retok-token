@@ -31,9 +31,9 @@ contract Distributor is Ownable {
     function _addIncome(uint40 amount) internal {
         require(amount > 0, "Distributor: amount has to be > 0");
         IWhitelistToken token = IWhitelistToken(_tokenAddress);
-        token.snapshot();
         _TotalIncomes.push(amount);
         emit IncomeAdded(amount, uint16(_TotalIncomes.length - 1));
+        token.snapshot();
     }
 
     function cumulativeShareOf(address tokenHolder) external view returns (uint40) {
