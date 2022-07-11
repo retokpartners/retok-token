@@ -1,0 +1,70 @@
+{
+  "name": "My Token List",
+  "logoURI": "https://retok.finance/logo-token.svg",
+  "keywords": [
+    "retok",    
+    "special tokens"
+  ],
+  "tags": {
+    "stablecoin": {
+      "name": "Stablecoin",
+      "description": "Tokens that are fixed to an external asset, e.g. the US dollar"
+    },
+    "assets": {
+      "name": "Asset backed token",
+      "description": "Tokens that are backed token, e.g. real estate"
+    }
+  },
+  "timestamp": "2022-07-11T00:00:00+00:00",
+  "tokens": [
+    {
+      "chainId": 43114,
+      "address": "0xE1d70994Be12b73E76889412b284A8F19b0DE56d",
+      "symbol": "EEUR",
+      "name": "e-money EEUR",
+      "decimals": 6,
+      "logoURI": "https://s2.coinmarketcap.com/static/img/coins/64x64/13877.png",
+      "tags": [
+        "stablecoin"
+      ]
+    },
+    {
+      "chainId": 43114,
+      "address": "0xD22dF86b096728caeeB8229FbcA8B29713f5c35a",
+      "symbol": "RTKFR",
+      "name": "Retok France",
+      "decimals": 0,
+      "logoURI": "https://retok.finance/avatar-FR.svg",
+      "tags": [
+        "assets"
+      ]
+    },
+    {
+      "chainId": 43114,
+      "address": "0x3CF2F41d45758DfAa3852981c2D288557CDA7c42",
+      "symbol": "RTKCH",
+      "name": "Retok Switzerland",
+      "decimals": 0,
+      "logoURI": "https://retok.finance/avatar-CH.svg",
+      "tags": [
+        "assets"
+      ]
+    },
+    {
+      "chainId": 43114,
+      "address": "0xD317a6213504B02a9a3c4c7A2e443449b5F457DA",
+      "symbol": "RTKIL",
+      "name": "Retok Israel",
+      "decimals": 0,
+      "logoURI": "https://retok.finance/avatar-IL.svg",
+      "tags": [
+        "assets"
+      ]
+    }
+  ],
+  "version": {
+    "major": 1,
+    "minor": 0,
+    "patch": 0
+  }
+}
