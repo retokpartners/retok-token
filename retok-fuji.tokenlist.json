@@ -1,0 +1,72 @@
+{
+  "name": "Retok Tokens on Fuji",
+  "logoURI": "https://retok.finance/logo-token.svg",
+  "keywords": [
+    "retok",    
+    "special tokens",
+    "testnet",
+    "fuji"
+  ],
+  "tags": {
+    "stablecoin": {
+      "name": "Stablecoin",
+      "description": "Tokens that are fixed to an external asset, e.g. the US dollar"
+    },
+    "assets": {
+      "name": "Asset backed token",
+      "description": "Tokens that are backed token, e.g. real estate"
+    }
+  },
+  "timestamp": "2022-07-27T00:00:00+00:00",
+  "tokens": [
+    {
+      "chainId": 43113,
+      "address": "0xc23a968e7e02ff04D471d5c73f0C33F531971b61",
+      "symbol": "EEUR",
+      "name": "e-money EEUR",
+      "decimals": 6,
+      "logoURI": "https://s2.coinmarketcap.com/static/img/coins/64x64/13877.png",
+      "tags": [
+        "stablecoin"
+      ]
+    },
+    {
+      "chainId": 43113,
+      "address": "0x6Da34D3540075D0480ECd77e4687839973C592e1",
+      "symbol": "RTKFR",
+      "name": "Retok France",
+      "decimals": 0,
+      "logoURI": "https://retok.finance/avatar-FR.svg",
+      "tags": [
+        "assets"
+      ]
+    },
+    {
+      "chainId": 43113,
+      "address": "0x0BC532CDfD80f5d8b45350838972D488E9eA7C74",
+      "symbol": "RTKCH",
+      "name": "Retok Switzerland",
+      "decimals": 0,
+      "logoURI": "https://retok.finance/avatar-CH.svg",
+      "tags": [
+        "assets"
+      ]
+    },
+    {
+      "chainId": 43113,
+      "address": "0x064C6a5c4DB4A303eE299bdEa57E5075048D7a1E",
+      "symbol": "RTKIL",
+      "name": "Retok Israel",
+      "decimals": 0,
+      "logoURI": "https://retok.finance/avatar-IL.svg",
+      "tags": [
+        "assets"
+      ]
+    }
+  ],
+  "version": {
+    "major": 1,
+    "minor": 0,
+    "patch": 0
+  }
+}
