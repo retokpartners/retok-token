@@ -58,7 +58,7 @@ contract Distributor is Ownable {
         uint16 startAtSnapshotIdx = holderIncome.snapshotIdx;
 
         // Start at the first income, or the next one if share had already been computed at least once before for this tokenHolder.
-        if (startAtSnapshotIdx > 0) {
+        if (holderIncome.present) {
             startAtSnapshotIdx += 1;
         }
 

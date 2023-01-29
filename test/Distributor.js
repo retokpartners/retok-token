@@ -198,6 +198,36 @@ describe("Distributor", () => {
                 expect(await distributor.cumulativeWithdrawalsOf(alice.address)).to.equal(shareAmount / 10000)
             })
 
+            describe(`after alice has withdrawn her income, and another income has been added`, () => {
+                beforeEach(async () => {
+                    await paymentCoin.mintTo(distributor.address, (incomes[0])*100*10000)
+                    await distributor.connect(alice).withdraw()
+                    await distributor.addIncome(incomes[1])
+                })
+
+                it("should transfer the right amount to alice", async () => {
+                    await paymentCoin.mintTo(distributor.address, incomes[1]*100*10000)
+                    let share = await whitelistToken.shareOfAt(alice.address, 2)
+                    expectedAmount = Math.floor(share * incomes[1]*100 / 1000000)
+                    let previousCoinBalance = await paymentCoin.balanceOf(alice.address)/10000
+                    await distributor.connect(alice).withdraw()
+                    expect(await paymentCoin.balanceOf(alice.address)/10000).to.equal(expectedAmount + previousCoinBalance)
+                })
+
+
+                it("should return the right cumulative share for alice", async () => {
+                    await distributor.computeCumulativeShare(alice.address)
+                    let aliceShareAmount = await distributor.cumulativeShareOf(alice.address)
+                    let expectedAmount = 0
+                    for(i=0; i<2; i++) {
+                        let share = await whitelistToken.shareOfAt(alice.address, i+1)
+                        expectedAmount += Math.floor(share * incomes[i]*100 / 1000000)
+                    }
+                    expect(aliceShareAmount).to.equal(expectedAmount)
+                })
+
+            })
+
             describe(`after a ${incomes[1]} income has been added`, () => {
                 beforeEach(async () => {
                     await distributor.addIncome(incomes[1])
