@@ -4,8 +4,9 @@ import { BigNumber } from "ethers"
 import "@nomiclabs/hardhat-waffle"
 import '@nomiclabs/hardhat-etherscan'
 import 'hardhat-abi-exporter'
-import { APIKEY, TESTNETACCOUNT, MAINNETACCOUNT } from './.env.tests.json'
-import "hardhat-interface-generator";
+import { APIKEY, TESTNETACCOUNT, MAINNETACCOUNT } from './.env.json'
+import "hardhat-interface-generator"
+import "hardhat-dependency-compiler"
 
 const FORK_FUJI = false
 const FORK_MAINNET = false
@@ -82,5 +83,10 @@ module.exports = {
       pretty: false,
       only: ['WhitelistToken.sol', 'Distributor.sol']
     }
-  ]
+  ],
+  dependencyCompiler: {
+    paths: [
+      '@pythnetwork/pyth-sdk-solidity/MockPyth.sol',
+    ],
+  }
 };

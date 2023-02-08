@@ -21,6 +21,8 @@
     "ts-node": "^10.8.1"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.8.1"
+    "@openzeppelin/contracts": "^4.8.1",
+    "@pythnetwork/pyth-sdk-solidity": "^2.2.0",
+    "hardhat-dependency-compiler": "^1.1.3"
   }
 }
