@@ -18,7 +18,7 @@
     "hardhat": "^2.12.6",
     "hardhat-abi-exporter": "^2.10.1",
     "hardhat-interface-generator": "^0.0.6",
-    "ts-node": "^10.8.1"
+    "ts-node": "^10.9.1"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.8.1",
