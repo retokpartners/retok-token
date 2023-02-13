@@ -20,7 +20,6 @@ contract Distributor is Ownable {
     address private _coinAddress;
     uint40[] private _TotalIncomes;
     mapping(address => Income) private _splitIncomes;
-    mapping(address => uint40) private _withdrawals;
 
     constructor(address tokenAddress, address coinAddress) {
         _tokenAddress = tokenAddress;
@@ -40,10 +39,6 @@ contract Distributor is Ownable {
         Income storage holderIncome = _splitIncomes[tokenHolder];
         require(holderIncome.snapshotIdx == _TotalIncomes.length - 1, 'Distributor: Call computeCumulativeShare first to update share');
         return holderIncome.amount;
-    }
-
-    function cumulativeWithdrawalsOf(address tokenHolder) external view returns (uint40) {
-        return _withdrawals[tokenHolder];
     }
 
     function _computeCumulativeShare(address tokenHolder) private {
@@ -89,20 +84,20 @@ contract Distributor is Ownable {
         require(token.hasRole(token.WHITELIST(), tokenHolder), 'Distributor: sender is restricted');
         _computeCumulativeShare(tokenHolder);
 
-        uint40 balance = _splitIncomes[tokenHolder].amount - _withdrawals[tokenHolder];
+        uint40 balance = _splitIncomes[tokenHolder].amount;
         require(balance > 0, 'Distributor: No balance to withdraw');
 
         IERC20 coin = IERC20(_coinAddress);
         uint48 coinAmount = uint48(balance) * 10_000;
         require(coin.balanceOf(address(this)) >= coinAmount, "Distributor: Contract doesn't have sufficient fund");
 
-        // Update lifetime amount withdrew
-        _withdrawals[tokenHolder] += balance;
+        // Reset balance
+        _splitIncomes[tokenHolder].amount = 0;
+
         emit Withdrawal(tokenHolder, balance);
 
         // Transfer coins to token holder
         coin.safeTransfer(tokenHolder, coinAmount);
-
     }
 
     // Transfer funds out of the contract to its owner
@@ -115,8 +110,6 @@ contract Distributor is Ownable {
     function transferToOwner(uint256 amount) external onlyOwner {
         _transferToOwner(amount);
     }
-
-
     // EVENTS
 
     /**

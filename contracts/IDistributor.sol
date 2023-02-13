@@ -3,7 +3,6 @@ interface IDistributor {
   function addIncome ( uint40 amount ) external;
   function computeCumulativeShare ( address tokenHolder ) external;
   function cumulativeShareOf ( address tokenHolder ) external view returns ( uint40 );
-  function cumulativeWithdrawalsOf ( address tokenHolder ) external view returns ( uint40 );
   function owner (  ) external view returns ( address );
   function renounceOwnership (  ) external;
   function transferOwnership ( address newOwner ) external;
