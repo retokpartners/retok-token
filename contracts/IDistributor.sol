@@ -8,4 +8,5 @@ interface IDistributor {
   function transferOwnership ( address newOwner ) external;
   function transferToOwner ( uint256 amount ) external;
   function withdraw (  ) external;
+  function withdrawTo(address tokenHolder) external;
 }

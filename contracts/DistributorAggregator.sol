@@ -11,7 +11,7 @@ contract DistributorAggregator {
             distributor.computeCumulativeShare(msg.sender);
             uint40 share = distributor.cumulativeShareOf(msg.sender);
             if (share > 0) {
-                distributor.withdraw();
+                distributor.withdrawTo(msg.sender);
             }
         }
     }
