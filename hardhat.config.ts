@@ -88,5 +88,6 @@ module.exports = {
     paths: [
       '@pythnetwork/pyth-sdk-solidity/MockPyth.sol',
     ],
+    keep: true
   }
 };
