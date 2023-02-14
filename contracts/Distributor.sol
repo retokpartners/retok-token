@@ -16,14 +16,27 @@ contract Distributor is Ownable {
         uint40 amount;
     }
 
-    address private _tokenAddress;
-    address private _coinAddress;
-    uint40[] private _TotalIncomes;
-    mapping(address => Income) private _splitIncomes;
+    address public _tokenAddress;
+    address public _coinAddress;
+    uint40[] public _TotalIncomes;
+    mapping(address => Income) public _splitIncomes;
 
-    constructor(address tokenAddress, address coinAddress) {
+    constructor(address tokenAddress, address coinAddress, uint40[] memory previousIncomes) {
         _tokenAddress = tokenAddress;
         _coinAddress = coinAddress; // Coin used for income payment
+        _TotalIncomes = previousIncomes;
+    }
+
+    function _setIncome(address tokenHolder, Income memory income) internal {
+        require(!_splitIncomes[tokenHolder].present, 'Distributor: Cannot set already initialized income');
+        require(income.snapshotIdx < _TotalIncomes.length, 'Distributor: Cannot set snapshotIdx > TotalIncomes length');
+        _splitIncomes[tokenHolder] = income;
+    }
+
+    // Initialize tokenHolder income from previous deployment
+    function initIncome(address tokenHolder, uint16 snapshotIdx) external onlyOwner {
+        Income memory income = Income(true, snapshotIdx, 0);
+        _setIncome(tokenHolder, income);
     }
 
     // Income and share computation
