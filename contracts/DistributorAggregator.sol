@@ -8,7 +8,11 @@ contract DistributorAggregator {
     function withdraw(address[] calldata distributorList) external {
         for(uint16 i=0; i < distributorList.length; i++) {
             IDistributor distributor = IDistributor(distributorList[i]);
-            distributor.withdraw();
+            distributor.computeCumulativeShare(msg.sender);
+            uint40 share = distributor.cumulativeShareOf(msg.sender);
+            if (share > 0) {
+                distributor.withdraw();
+            }
         }
     }
 }
