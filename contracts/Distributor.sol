@@ -7,8 +7,10 @@ import "@openzeppelin/contracts/interfaces/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./IWhitelistToken.sol";
 
-contract Distributor is Ownable {
+contract Distributor is Ownable, AccessControl {
     using SafeERC20 for IERC20;
+
+     bytes32 public constant WITHDRAWER = keccak256("WITHDRAWER");
 
     struct Income {
         bool   present;
@@ -22,6 +24,7 @@ contract Distributor is Ownable {
     mapping(address => Income) public _splitIncomes;
 
     constructor(address tokenAddress, address coinAddress, uint40[] memory previousIncomes) {
+        _grantRole(DEFAULT_ADMIN_ROLE, Ownable.owner());
         _tokenAddress = tokenAddress;
         _coinAddress = coinAddress; // Coin used for income payment
         _TotalIncomes = previousIncomes;
@@ -92,6 +95,12 @@ contract Distributor is Ownable {
         _withdraw(msg.sender);
     }
 
+    function withdrawTo(address tokenHolder) external {
+        require(hasRole(WITHDRAWER, msg.sender), 'Distributor: Sender is not allowed to withdraw on behalf of a tokenHolder');
+        _withdraw(tokenHolder);
+    }
+
+
     function _withdraw(address tokenHolder) internal {
         IWhitelistToken token = IWhitelistToken(_tokenAddress);
         require(token.hasRole(token.WHITELIST(), tokenHolder), 'Distributor: sender is restricted');
@@ -123,6 +132,13 @@ contract Distributor is Ownable {
     function transferToOwner(uint256 amount) external onlyOwner {
         _transferToOwner(amount);
     }
+
+    // Add an address as a withdrawer
+    function addWithdrawer(address withdrawerAddress) external onlyOwner {
+        grantRole(WITHDRAWER, withdrawerAddress);
+    }
+
+
     // EVENTS
 
     /**

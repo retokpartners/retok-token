@@ -63,6 +63,12 @@ describe("Distributor", () => {
             expect(await distributor.owner()).to.equal(owner.address);
         })
 
+        it("should set the owner as admin", async function () {
+            expect(await distributor.hasRole(ethers.utils.hexZeroPad("0x0", 32), owner.address)).to.be.true
+        })
+    })
+
+    describe("access control", () => {
         // Transfer
         it("shouldn't allow non-owner to transfer ownership ", async () => {
             await expect(distributor.connect(bob).transferOwnership(alice.address)).to.be.revertedWith("Ownable: caller is not the owner")
@@ -72,6 +78,32 @@ describe("Distributor", () => {
             await distributor.transferOwnership(alice.address)
             newOwner = await distributor.owner()
             expect(newOwner).to.equal(alice.address)
+        })
+
+        // Grant
+        it("shouldn't allow non-owner to grant WITHDRAWER role", async () => {
+            const hashedWithdrawerRole = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("WITHDRAWER"));
+            await expect(distributor.connect(bob).grantRole(hashedWithdrawerRole, alice.address)).to.be.reverted
+        })
+
+        it("should allow owner to grant WITHDRAWER role", async () => {
+            const hashedWithdrawerRole = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("WITHDRAWER"));
+            await distributor.grantRole(hashedWithdrawerRole, alice.address)
+            expect(await distributor.hasRole(hashedWithdrawerRole, alice.address)).to.be.true
+        })
+
+        // Revoke
+        it("shouldn't allow non-owner to revoke WITHDRAWER role", async () => {
+            const hashedWithdrawerRole = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("WITHDRAWER"));
+            await distributor.grantRole(hashedWithdrawerRole, alice.address)
+            await expect(distributor.connect(bob).revokeRole(hashedWithdrawerRole, alice.address)).to.be.reverted
+        })
+
+        it("should allow owner to revoke WITHDRAWER role", async () => {
+            const hashedWithdrawerRole = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("WITHDRAWER"));
+            await distributor.grantRole(hashedWithdrawerRole, alice.address)
+            await distributor.revokeRole(hashedWithdrawerRole, alice.address)
+            expect(await distributor.hasRole(hashedWithdrawerRole, alice.address)).to.be.false
         })
     })
 
@@ -232,6 +264,31 @@ describe("Distributor", () => {
                 await expect(distributor.connect(alice).withdraw()).to.be.revertedWith('Distributor: No balance to withdraw')
             })
 
+            describe(`withdrawTo`, () => {
+                beforeEach(async () => {
+                    await paymentCoin.mintTo(distributor.address, totalIncome*100*10000)
+                    const hashedWithdrawerRole = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("WITHDRAWER"));
+                    await distributor.grantRole(hashedWithdrawerRole, chris.address)
+                })
+
+                it(`shouldn't be allowed to unauthorized accounts`, async () => {
+                    await expect(distributor.connect(bob).withdrawTo(alice.address)).to.be.revertedWith('Distributor: Sender is not allowed to withdraw on behalf of a tokenHolder')
+                })
+
+                it(`should be allowed to authorized accounts`, async () => {
+                    let expectedAmount = 0
+                    for(i=0; i<4; i++) {
+                        let share = await whitelistToken.shareOfAt(alice.address, i+1)
+                        expectedAmount += Math.floor(share * incomes[i]*100 / 1000000)
+                    }
+
+                    await expect(distributor.connect(chris).withdrawTo(alice.address))
+                        .to.emit(distributor, 'Withdrawal')
+                        .withArgs(alice.address, expectedAmount)
+                    let shareAmount = await paymentCoin.balanceOf(alice.address)
+                    expect(shareAmount).to.equal(expectedAmount * 10000)
+                })
+            })
             describe(`after alice has withdrawn her income, and another income has been added`, () => {
                 beforeEach(async () => {
                     await paymentCoin.mintTo(distributor.address, totalIncome*100*10000)
