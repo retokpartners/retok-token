@@ -5,10 +5,18 @@ contract MockDistributor {
     mapping (address => uint40) shares;
     mapping (address => bool) computed;
 
-    function withdraw() external {
-        if (shares[msg.sender] > 0 && computed[msg.sender]) {
+    function _withdraw(address tokenHolder) internal {
+        if (shares[tokenHolder] > 0 && computed[tokenHolder]) {
             emit Withdrawal();
         }
+    }
+
+    function withdraw() external {
+        _withdraw(msg.sender);
+    }
+
+    function withdrawTo(address tokenHolder) external {
+        _withdraw(tokenHolder);
     }
 
     function computeCumulativeShare(address tokenHolder) external {

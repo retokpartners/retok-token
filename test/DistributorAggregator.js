@@ -19,7 +19,8 @@ describe("DistributorAggregator", async () => {
 
         await expect(distributorAggregator.withdraw(distributors))
                 .to.emit(distributor1, 'Withdrawal')
-                .to.not.emit(distributor2, 'Withdrawal')
                 .to.emit(distributor3, 'Withdrawal')
+                .to.not.emit(distributor2, 'Withdrawal')
+
     })
 })
