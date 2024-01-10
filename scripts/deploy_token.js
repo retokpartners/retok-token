@@ -9,6 +9,7 @@ async function main() {
 
   for (i=0; i < contracts.length; i++) {
     let contract = contracts[i];
+
     // Deploy
     deployedContract = await WhitelistToken.deploy(contract.name, contract.symbol);
     await deployedContract.deployed();

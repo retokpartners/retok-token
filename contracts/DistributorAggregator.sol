@@ -6,10 +6,12 @@ import "./IDistributor.sol";
 contract DistributorAggregator {
     // Withdrawal
     function withdraw(address[] calldata distributorList) external {
+        IDistributor distributor;
+        uint40 share;
         for(uint16 i=0; i < distributorList.length; i++) {
-            IDistributor distributor = IDistributor(distributorList[i]);
+            distributor = IDistributor(distributorList[i]);
             distributor.computeCumulativeShare(msg.sender);
-            uint40 share = distributor.cumulativeShareOf(msg.sender);
+            share = distributor.cumulativeShareOf(msg.sender);
             if (share > 0) {
                 distributor.withdrawTo(msg.sender);
             }
