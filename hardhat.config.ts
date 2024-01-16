@@ -40,7 +40,7 @@ module.exports = {
   etherscan: {
     apiKey: APIKEY,
   },
-  solidity: "0.8.12",
+  solidity: "0.8.20",
   networks: {
     hardhat: {
       gasPrice: 225000000000,
@@ -87,6 +87,7 @@ module.exports = {
   dependencyCompiler: {
     paths: [
       '@pythnetwork/pyth-sdk-solidity/MockPyth.sol',
+      '@openzeppelin/contracts/access/manager/AccessManager.sol'
     ],
     keep: true
   }

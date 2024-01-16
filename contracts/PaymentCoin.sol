@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // Dummy mintable ERC20 coin for testing purposes.
-pragma solidity 0.8.12;
+pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/interfaces/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";

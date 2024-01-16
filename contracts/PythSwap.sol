@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.12;
+pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -19,7 +19,7 @@ contract PythSwap is Ownable {
     constructor(address pythContract,
                 address inputTokenContract,
                 address outputTokenContract,
-                bytes32 _priceId) {
+                bytes32 _priceId) Ownable(msg.sender) {
         pyth = IPyth(pythContract);
         inputToken = IERC20(inputTokenContract);
         outputToken = IERC20(outputTokenContract);

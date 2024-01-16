@@ -1,5 +1,3 @@
-pragma solidity 0.8.12;
-
 interface IERC1404 {
     /// @notice Detects if a transfer will be reverted and if so returns an appropriate reference code
     /// @param from Sending address

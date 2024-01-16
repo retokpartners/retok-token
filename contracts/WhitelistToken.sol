@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.12;
+pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Snapshot.sol";
+import "./ERC20Snapshot.sol";
 import "./IERC1404.sol";
 
 contract WhitelistToken is IERC20, IERC1404, Ownable, AccessControl, ERC20Snapshot {
@@ -21,7 +21,7 @@ contract WhitelistToken is IERC20, IERC1404, Ownable, AccessControl, ERC20Snapsh
     uint8 private constant REPLACE = 1;
     uint8 private constant OTHER = 2;
 
-    constructor(string memory _name, string memory _symbol) ERC20(_name,_symbol) {
+    constructor(string memory _name, string memory _symbol) ERC20(_name,_symbol) Ownable(msg.sender) {
         _grantRole(DEFAULT_ADMIN_ROLE, Ownable.owner());
     }
 
@@ -33,17 +33,13 @@ contract WhitelistToken is IERC20, IERC1404, Ownable, AccessControl, ERC20Snapsh
     }
 
     /**
-     * Moves tokens `amount` from `sender` to `recipient`.
+     * Transfers a value amount of tokens from from to to, or alternatively mints (or burns) if from (or to) is the zero address
+     * Override to enforce whitelist restrictions
      *
      * Emits a {Transfer} event.
      *
-     * Requirements:
-     *
-     * - `sender` cannot be the zero address.
-     * - `recipient` cannot be the zero address.
-     * - `sender` must have a balance of at least `amount`.
      */
-    function _transfer(address sender, address recipient, uint256 amount) override internal {
+    function _update(address sender, address recipient, uint256 amount) override internal {
         require(detectTransferRestriction(sender,recipient,amount) == NO_RESTRICTIONS, cat(name(), ": Transfer restriction detected. Please call detectTransferRestriction(address from, address to, uint256 value) for detailed information"));
         return super._transfer(sender, recipient, amount);
     }
@@ -61,30 +57,14 @@ contract WhitelistToken is IERC20, IERC1404, Ownable, AccessControl, ERC20Snapsh
     }
 
     /**
-     * Creates `amount` tokens and assigns them to `account`, increasing
-     * the total supply.
-     *
-     * Emits a {Transfer} event with `from` set to the zero address.
-     *
-     * Requirements
-     *
-     * - `to` cannot be the zero address.
-     */
-    function _mint(address account, uint256 amount) internal override {
-        require(hasRole(WHITELIST, account), cat(name(), ": address is not in whitelist"));
-        return super._mint(account, amount);
-    }
-
-
-    /**
      * Destroys `amount` tokens from `account`.
      *
      * See {_burn}.
      */
     function burn(address account, uint256 amount, uint8 code) external onlyOwner {
         require(code == REPLACE || code == OTHER, cat(name(), ": The code does not exist"));
-        _burn(account, amount);
         emit Burn(account, amount, code);
+        _burn(account, amount);
     }
 
     /**
@@ -99,8 +79,8 @@ contract WhitelistToken is IERC20, IERC1404, Ownable, AccessControl, ERC20Snapsh
      */
     function mintTo(address account, uint256 amount, uint8 code) external onlyOwner {
         require(code == SALE || code == REPLACE, cat(name(), ": The code does not exist"));
-        _mint(account, amount);
         emit Mint(account, amount, code);
+        _mint(account, amount);
     }
 
     /**
@@ -163,9 +143,9 @@ contract WhitelistToken is IERC20, IERC1404, Ownable, AccessControl, ERC20Snapsh
      * Detects if a transfer will be reverted and if so returns an appropriate reference code
      */
     function detectTransferRestriction(address from, address to, uint256 value) public view returns (uint8){
-        if(!hasRole(WHITELIST, from)){
+        if(from != address(0) && !hasRole(WHITELIST, from)){
             return FROM_NOT_WHITELISTED;
-        } else if(!hasRole(WHITELIST, to)){
+        } else if(to != address(0) && !hasRole(WHITELIST, to)){
             return TO_NOT_WHITELISTED;
         } else {
             return NO_RESTRICTIONS;

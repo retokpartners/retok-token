@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.12;
 
 interface IWhitelistToken {
   function DEFAULT_ADMIN_ROLE (  ) external view returns ( bytes32 );
