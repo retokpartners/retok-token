@@ -1,12 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+import {AccessManaged} from "@openzeppelin/contracts/access/manager/AccessManaged.sol";
 import "./IDistributor.sol";
 
 // Proxy contract to withdraw from multiple distributors in one transaction
-contract DistributorAggregator {
+contract DistributorAggregator is AccessManaged {
+
+    constructor(address manager) AccessManaged(manager) {
+    }
+
     // Withdrawal
-    function withdraw(address[] calldata distributorList) external {
+    function withdraw(address[] calldata distributorList) external restricted {
         IDistributor distributor;
         uint40 balance;
 
