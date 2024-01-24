@@ -1,88 +1,80 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.12;
+pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/interfaces/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "./IWhitelistToken.sol";
+import {AccessManaged} from "@openzeppelin/contracts/access/manager/AccessManaged.sol";
+import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {ISnapshotToken} from "./ISnapshotToken.sol";
 
-contract Distributor is Ownable, AccessControl {
+contract Distributor is AccessManaged {
     using SafeERC20 for IERC20;
 
-     bytes32 public constant WITHDRAWER = keccak256("WITHDRAWER");
-
     struct Income {
-        bool   present;
-        uint16 snapshotIdx; // == snapshotId - 1
+        bool   importedAmountFromPrevious;
+        uint16 snapshotId;
         uint40 amount;
     }
 
     address public _tokenAddress;
     address public _coinAddress;
     uint40[] public _TotalIncomes;
+    address private _previousAddress;
     mapping(address => Income) public _splitIncomes;
 
-    constructor(address tokenAddress, address coinAddress, uint40[] memory previousIncomes) {
-        _grantRole(DEFAULT_ADMIN_ROLE, Ownable.owner());
+    constructor(address manager, address tokenAddress, address coinAddress, address previousAddress) AccessManaged(manager) {
         _tokenAddress = tokenAddress;
         _coinAddress = coinAddress; // Coin used for income payment
-        _TotalIncomes = previousIncomes;
-    }
-
-    function _setIncome(address tokenHolder, Income memory income) internal {
-        require(!_splitIncomes[tokenHolder].present, 'Distributor: Cannot set already initialized income');
-        require(income.snapshotIdx < _TotalIncomes.length, 'Distributor: Cannot set snapshotIdx > TotalIncomes length');
-        _splitIncomes[tokenHolder] = income;
-    }
-
-    // Initialize tokenHolder income from previous deployment
-    function initIncome(address tokenHolder, uint16 snapshotIdx) external onlyOwner {
-        Income memory income = Income(true, snapshotIdx, 0);
-        _setIncome(tokenHolder, income);
+        _previousAddress = previousAddress; // Address of previous distributor instance
     }
 
     // Income and share computation
     function _addIncome(uint40 amount) internal {
         require(amount > 0, "Distributor: amount has to be > 0");
-        IWhitelistToken token = IWhitelistToken(_tokenAddress);
+        ISnapshotToken token = ISnapshotToken(_tokenAddress);
         _TotalIncomes.push(amount);
-        emit IncomeAdded(amount, uint16(_TotalIncomes.length - 1));
+        emit IncomeAdded(amount, uint16(_TotalIncomes.length));
         token.snapshot();
     }
 
     function cumulativeShareOf(address tokenHolder) external view returns (uint40) {
         Income storage holderIncome = _splitIncomes[tokenHolder];
-        require(holderIncome.snapshotIdx == _TotalIncomes.length - 1, 'Distributor: Call computeCumulativeShare first to update share');
+        require(holderIncome.snapshotId == _TotalIncomes.length && holderIncome.importedAmountFromPrevious, 'Distributor: Call computeCumulativeShare first to update share');
         return holderIncome.amount;
     }
 
     function _computeCumulativeShare(address tokenHolder) private {
         Income storage holderIncome = _splitIncomes[tokenHolder];
-        if (holderIncome.present && holderIncome.snapshotIdx + 1 == _TotalIncomes.length) {
+        // Initialize data from previous distributor instance
+        if (!holderIncome.importedAmountFromPrevious) {
+            Distributor previousDistributor = Distributor(_previousAddress);
+            previousDistributor.computeCumulativeShare(tokenHolder);
+            holderIncome.amount = previousDistributor.cumulativeShareOf(tokenHolder);
+            holderIncome.importedAmountFromPrevious = true;
+        }
+
+
+        if (holderIncome.snapshotId == _TotalIncomes.length) {
             // There are no new periods to compute
             return;
         }
 
-        IWhitelistToken token = IWhitelistToken(_tokenAddress);
+        // Compute new periods income
+        ISnapshotToken token = ISnapshotToken(_tokenAddress);
         uint40 additionalAmount;
-        uint16 startAtSnapshotIdx = holderIncome.snapshotIdx;
 
-        // Start at the first income, or the next one if share had already been computed at least once before for this tokenHolder.
-        if (holderIncome.present) {
-            startAtSnapshotIdx += 1;
+        // Start at the next period
+        uint16 startAtSnapshotId = holderIncome.snapshotId + 1;
+
+        for(uint16 i=startAtSnapshotId; i < _TotalIncomes.length + 1; i++) {
+            additionalAmount += uint40(token.shareOfAt(tokenHolder, i) * (_TotalIncomes[i-1] * 100) / 1000000);
         }
 
-        for(uint16 i=startAtSnapshotIdx; i < _TotalIncomes.length; i++) {
-            additionalAmount += uint40(token.shareOfAt(tokenHolder, i + 1) * (_TotalIncomes[i] * 100) / 1000000);
-        }
-
-        holderIncome.present = true;
-        holderIncome.snapshotIdx = uint16(_TotalIncomes.length) - 1;
+        // Store last computed period and add new amount to holder balance
+        holderIncome.snapshotId = uint16(_TotalIncomes.length);
         holderIncome.amount += additionalAmount;
     }
 
-    function addIncome(uint40 amount) external onlyOwner{
+    function addIncome(uint40 amount) external restricted {
         _addIncome(amount);
     }
 
@@ -91,19 +83,15 @@ contract Distributor is Ownable, AccessControl {
     }
 
     // Withdrawal
-    function withdraw() external {
+    function withdraw() external restricted {
         _withdraw(msg.sender);
     }
 
-    function withdrawTo(address tokenHolder) external {
-        require(hasRole(WITHDRAWER, msg.sender), 'Distributor: Sender is not allowed to withdraw on behalf of a tokenHolder');
+    function withdrawTo(address tokenHolder) external restricted {
         _withdraw(tokenHolder);
     }
 
-
     function _withdraw(address tokenHolder) internal {
-        IWhitelistToken token = IWhitelistToken(_tokenAddress);
-        require(token.hasRole(token.WHITELIST(), tokenHolder), 'Distributor: sender is restricted');
         _computeCumulativeShare(tokenHolder);
 
         uint40 balance = _splitIncomes[tokenHolder].amount;
@@ -126,25 +114,19 @@ contract Distributor is Ownable, AccessControl {
     function _transferToOwner(uint256 amount) internal {
         IERC20 coin = IERC20(_coinAddress);
         require(coin.balanceOf(address(this)) >= amount, "Distributor: Contract doesn't have sufficient fund");
-        coin.safeTransfer(owner(), amount);
+        coin.safeTransfer(msg.sender, amount);
     }
 
-    function transferToOwner(uint256 amount) external onlyOwner {
+    function transferToOwner(uint256 amount) external restricted {
         _transferToOwner(amount);
     }
-
-    // Add an address as a withdrawer
-    function addWithdrawer(address withdrawerAddress) external onlyOwner {
-        grantRole(WITHDRAWER, withdrawerAddress);
-    }
-
 
     // EVENTS
 
     /**
-     * Emitted when `amount` income is added, with snapshot Index (`snapshotIdx`)
+     * Emitted when `amount` income is added, with snapshot Id (`snapshotId`)
      */
-    event IncomeAdded(uint40 amount, uint16 snapshotIdx);
+    event IncomeAdded(uint40 amount, uint16 snapshotId);
 
     /**
      * Emitted when an `amount` balance is withdrew by (`tokenHolder`)
