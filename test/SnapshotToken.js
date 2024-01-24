@@ -37,6 +37,12 @@ describe("SnapshotToken", () => {
 
     })
 
+    describe("deployment", () => {
+        it("should set the right manager", async function () {
+            expect(await snapshotToken.authority()).to.equal(accessManager.address);
+        })
+    })
+
     it("should have Name equals to `TestToken`", async () => {
         expect(await snapshotToken.name()).to.equal("TestToken")
     })

@@ -2,6 +2,9 @@ const { expect } = require("chai")
 const { ethers } = require("hardhat")
 
 describe("PythSwap", () => {
+    let AccessManager
+    let accessManager
+
     let PythSwap
     let pyth_swap
 
@@ -31,8 +34,17 @@ describe("PythSwap", () => {
         {name: "chris", account: 3}
     ]
 
+    // Roles
+    const OWNER = 10n
+
 
     beforeEach(async () => {
+        accounts = await ethers.getSigners();
+        [owner, alice, bob, chris, broker] = accounts;
+
+        AccessManager = await ethers.getContractFactory("AccessManager");
+        accessManager = await AccessManager.deploy(owner.address)
+
         TokenContract = await ethers.getContractFactory("PaymentCoin")
         input_token = await TokenContract.deploy('InputCoin', 'INC');
         output_token = await TokenContract.deploy('OutputCoin', 'OUTC');
@@ -50,29 +62,24 @@ describe("PythSwap", () => {
         }
 
         PythSwap = await ethers.getContractFactory("PythSwap");
-        pyth_swap = await PythSwap.deploy(mock_pyth.address, input_token.address, output_token.address, priceId);
+        pyth_swap = await PythSwap.deploy(accessManager.address, mock_pyth.address, input_token.address, output_token.address, priceId);
 
-        accounts = await ethers.getSigners();
-        [owner, alice, bob, chris, broker] = accounts;
+        await accessManager.grantRole(OWNER, owner.address, 0)
+        await accessManager.setTargetFunctionRole(
+            pyth_swap.address,
+            [
+                ethers.utils.id('transferToOwner(address,uint256)').substring(0, 10)
+            ],
+            OWNER
+       )
 
         inputAmount = Math.floor(Math.random() * 10**8)
 
     })
 
     describe("deployment", () => {
-        it("should set the right owner", async function () {
-            expect(await pyth_swap.owner()).to.equal(owner.address)
-        })
-
-        // Transfer
-        it("shouldn't allow non-owner to transfer ownership ", async () => {
-            await expect(pyth_swap.connect(bob).transferOwnership(alice.address)).to.be.revertedWith("Ownable: caller is not the owner")
-        })
-
-        it("should allow the owner to transfer ownership ", async () => {
-            await pyth_swap.transferOwnership(alice.address)
-            newOwner = await pyth_swap.owner()
-            expect(newOwner).to.equal(alice.address)
+        it("should set the right manager", async function () {
+            expect(await pyth_swap.authority()).to.equal(accessManager.address);
         })
     })
 

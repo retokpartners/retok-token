@@ -1,25 +1,25 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import {AccessManaged} from "@openzeppelin/contracts/access/manager/AccessManaged.sol";
 import "@openzeppelin/contracts/interfaces/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@pythnetwork/pyth-sdk-solidity/IPyth.sol";
 import "@pythnetwork/pyth-sdk-solidity/PythStructs.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 
-contract PythSwap is Ownable {
+contract PythSwap is AccessManaged {
     using SafeERC20 for IERC20;
     IPyth pyth;
     IERC20 inputToken;
     IERC20 outputToken;
     bytes32 priceId;
 
-    constructor(address pythContract,
+    constructor(address manager,
+                address pythContract,
                 address inputTokenContract,
                 address outputTokenContract,
-                bytes32 _priceId) Ownable(msg.sender) {
+                bytes32 _priceId) AccessManaged(manager) {
         pyth = IPyth(pythContract);
         inputToken = IERC20(inputTokenContract);
         outputToken = IERC20(outputTokenContract);
@@ -60,10 +60,10 @@ contract PythSwap is Ownable {
     function _transferToOwner(address coinAddress, uint256 amount) internal {
         IERC20 coin = IERC20(coinAddress);
         require(coin.balanceOf(address(this)) >= amount, "PythSwap: Contract doesn't have sufficient fund");
-        coin.safeTransfer(owner(), amount);
+        coin.safeTransfer(msg.sender, amount);
     }
 
-    function transferToOwner(address coinAddress,uint256 amount) external onlyOwner {
+    function transferToOwner(address coinAddress,uint256 amount) external restricted {
         _transferToOwner(coinAddress, amount);
     }
 
