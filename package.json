@@ -17,7 +17,7 @@
     "ethers": "^5.7.2",
     "hardhat": "^2.14.0",
     "hardhat-abi-exporter": "^2.10.1",
-    "hardhat-interface-generator": "^0.0.6",
+    "hardhat-interface-generator": "file:../hardhat-interface-generator",
     "ts-node": "^10.9.1"
   },
   "dependencies": {

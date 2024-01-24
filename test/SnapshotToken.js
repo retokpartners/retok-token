@@ -14,7 +14,7 @@ describe("SnapshotToken", () => {
 
     // Roles
     const OWNER = 10n
-    const SNAPSHOOTER = 30n
+    const SNAPSHOOTER = 40n
 
     beforeEach(async  () => {
         [owner, alice, bob, chris, broker] = await ethers.getSigners();
