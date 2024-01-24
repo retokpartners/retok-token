@@ -14,6 +14,11 @@ contract SnapshotToken is IERC20, AccessManaged, ERC20Snapshot {
     constructor(string memory _name, string memory _symbol, address manager) ERC20(_name,_symbol) AccessManaged(manager) {
     }
 
+    // Use the standard decimals for stable coins
+    function decimals() public pure override returns (uint8) {
+        return 6;
+    }
+
     /**
      * Concatenate Strings with an optimized Method.
      *
@@ -25,8 +30,6 @@ contract SnapshotToken is IERC20, AccessManaged, ERC20Snapshot {
     function cat(string memory a, string memory b) internal pure returns (string memory) {
         return string(abi.encodePacked(a, b));
     }
-
-
 
     /**
      * Destroys `amount` tokens from `account`.

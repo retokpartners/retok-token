@@ -45,8 +45,8 @@ describe("SnapshotToken", () => {
         expect(await snapshotToken.symbol()).to.equal("TTK")
     })
 
-    it("should have Decimals equals to 18", async () => {
-        expect(await snapshotToken.decimals()).to.equal(18)
+    it("should have Decimals equals to 6", async () => {
+        expect(await snapshotToken.decimals()).to.equal(6)
     })
 
     it("should start with a total supply of 0", async () => {
