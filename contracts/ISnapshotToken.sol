@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: MIT
+pragma solidity >=0.1.0 <0.9.0;
+
 interface ISnapshotToken {
   function CLOCK_MODE (  ) external view returns ( string memory );
   function allowance ( address owner, address spender ) external view returns ( uint256 );
@@ -8,7 +10,7 @@ interface ISnapshotToken {
   function balanceOfAt ( address account, uint48 snapshotId ) external view returns ( uint256 );
   function burn ( address account, uint256 amount, uint8 code ) external;
   function clock (  ) external view returns ( uint48 );
-  function decimals (  ) external view returns ( uint8 );
+  function decimals (  ) external pure returns ( uint8 );
   function isConsumingScheduledOp (  ) external view returns ( bytes4 );
   function messageForBurnCode ( uint8 code ) external pure returns ( string memory );
   function messageForMintCode ( uint8 code ) external pure returns ( string memory );
