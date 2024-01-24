@@ -14,8 +14,8 @@ describe("DistributorAggregator", async () => {
         accounts = await ethers.getSigners()
         owner = accounts[0]
 
-        await distributor1.setShare(owner.address, 123456)
-        await distributor3.setShare(owner.address, 654321)
+        await distributor1.setIncome(owner.address, 123456)
+        await distributor3.setIncome(owner.address, 654321)
 
         await expect(distributorAggregator.withdraw(distributors))
                 .to.emit(distributor1, 'Withdrawal')
