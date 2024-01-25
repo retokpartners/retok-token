@@ -42,16 +42,26 @@ contract Distributor is AccessManaged {
         return holderIncome.amount;
     }
 
-    function _computeCumulativeShare(address tokenHolder) private {
+    // Initialize data from previous distributor instance
+    function _importIncomeFromPrevious(address tokenHolder) private {
         Income storage holderIncome = _splitIncomes[tokenHolder];
-        // Initialize data from previous distributor instance
-        if (!holderIncome.importedAmountFromPrevious) {
-            Distributor previousDistributor = Distributor(_previousAddress);
-            previousDistributor.computeCumulativeShare(tokenHolder);
-            holderIncome.amount = previousDistributor.cumulativeShareOf(tokenHolder);
-            holderIncome.importedAmountFromPrevious = true;
+        holderIncome.importedAmountFromPrevious = true;
+        if (_previousAddress == address(0)) {
+            return;
         }
 
+        Distributor previousDistributor = Distributor(_previousAddress);
+        previousDistributor.computeCumulativeShare(tokenHolder);
+        holderIncome.amount = previousDistributor.cumulativeShareOf(tokenHolder);
+    }
+
+    function _computeCumulativeShare(address tokenHolder) private {
+        Income storage holderIncome = _splitIncomes[tokenHolder];
+
+        // The first time this method is called, import balance from previous instance
+        if (!holderIncome.importedAmountFromPrevious) {
+            _importIncomeFromPrevious(tokenHolder);
+        }
 
         if (holderIncome.snapshotId == _TotalIncomes.length) {
             // There are no new periods to compute
@@ -66,7 +76,7 @@ contract Distributor is AccessManaged {
         uint16 startAtSnapshotId = holderIncome.snapshotId + 1;
 
         for(uint16 i=startAtSnapshotId; i < _TotalIncomes.length + 1; i++) {
-            additionalAmount += uint40(token.shareOfAt(tokenHolder, i) * (_TotalIncomes[i-1] * 100) / 1000000);
+            additionalAmount += uint40(token.shareOfAt(tokenHolder, i) * (_TotalIncomes[i-1] * 100) / 1_000_000);
         }
 
         // Store last computed period and add new amount to holder balance
