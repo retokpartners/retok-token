@@ -62,13 +62,14 @@ describe("PythSwap", () => {
         }
 
         PythSwap = await ethers.getContractFactory("PythSwap");
-        pyth_swap = await PythSwap.deploy(accessManager.address, mock_pyth.address, input_token.address, output_token.address, priceId);
+        pyth_swap = await PythSwap.deploy(accessManager.target, mock_pyth.target, input_token.target, output_token.target, priceId);
 
         await accessManager.grantRole(OWNER, owner.address, 0)
+
         await accessManager.setTargetFunctionRole(
-            pyth_swap.address,
+            pyth_swap.target,
             [
-                ethers.utils.id('transferToOwner(address,uint256)').substring(0, 10)
+                ethers.id('transferToOwner(address,uint256)').substring(0, 10)
             ],
             OWNER
        )
@@ -79,7 +80,7 @@ describe("PythSwap", () => {
 
     describe("deployment", () => {
         it("should set the right manager", async function () {
-            expect(await pyth_swap.authority()).to.equal(accessManager.address);
+            expect(await pyth_swap.authority()).to.equal(accessManager.target);
         })
     })
 
@@ -96,7 +97,7 @@ describe("PythSwap", () => {
                 price.publishTime     // publishTime
             );
 
-            expect(await pyth_swap.updatePythnet([priceFeedUpdateData], { value: ethers.utils.parseUnits("10", "wei") }))
+            expect(await pyth_swap.updatePythnet([priceFeedUpdateData], { value: ethers.parseUnits("10", "wei") }))
                 .to.emit(MockPyth, 'PriceFeedUpdate')
         })
     })
@@ -142,48 +143,48 @@ describe("PythSwap", () => {
 
         it("should fails if contract doesn't have enough outputToken", async () => {
             await input_token.mintTo(owner.address, 100)
-            await expect(pyth_swap.swap(100, [priceFeedUpdateData], { value: ethers.utils.parseUnits("10", "wei") }))
+            await expect(pyth_swap.swap(100, [priceFeedUpdateData], { value: ethers.parseUnits("10", "wei") }))
                 .to.be.revertedWith("PythSwap: Contract doesn't have sufficient fund")
         })
 
         it("should fails if contract doesn't have enough outputToken", async () => {
             await input_token.mintTo(owner.address, 100)
-            await expect(pyth_swap.swap(100, [priceFeedUpdateData], { value: ethers.utils.parseUnits("10", "wei") }))
+            await expect(pyth_swap.swap(100, [priceFeedUpdateData], { value: ethers.parseUnits("10", "wei") }))
                 .to.be.revertedWith("PythSwap: Contract doesn't have sufficient fund")
         })
 
         describe("when everything's set", () => {
             beforeEach(async () => {
                 await input_token.mintTo(alice.address, initialBalance)
-                await output_token.mintTo(pyth_swap.address, initialBalance)
-                await input_token.connect(alice).approve(pyth_swap.address, inputAmount)
+                await output_token.mintTo(pyth_swap.target, initialBalance)
+                await input_token.connect(alice).approve(pyth_swap.target, inputAmount)
             })
 
             it("should emit a Swap event", async () => {
-                expect (await pyth_swap.connect(alice).swap(inputAmount, [priceFeedUpdateData], { value: ethers.utils.parseUnits("10", "wei") }))
+                expect (await pyth_swap.connect(alice).swap(inputAmount, [priceFeedUpdateData], { value: ethers.parseUnits("10", "wei") }))
                     .to.emit(PythSwap, 'Swap')
             })
 
             it("should reduce sender inputToken balance by inputAmount", async () => {
-                await pyth_swap.connect(alice).swap(inputAmount, [priceFeedUpdateData], { value: ethers.utils.parseUnits("10", "wei") })
+                await pyth_swap.connect(alice).swap(inputAmount, [priceFeedUpdateData], { value: ethers.parseUnits("10", "wei") })
                 expect (await input_token.balanceOf(alice.address)).to.equal(initialBalance - inputAmount)
             })
 
             it("should increase contract inputToken balance by inputAmount", async () => {
-                await pyth_swap.connect(alice).swap(inputAmount, [priceFeedUpdateData], { value: ethers.utils.parseUnits("10", "wei") })
-                expect (await input_token.balanceOf(pyth_swap.address)).to.equal(inputAmount)
+                await pyth_swap.connect(alice).swap(inputAmount, [priceFeedUpdateData], { value: ethers.parseUnits("10", "wei") })
+                expect (await input_token.balanceOf(pyth_swap.target)).to.equal(inputAmount)
             })
 
             it("should increase sender outputToken balance by outputAmount", async () => {
-                await pyth_swap.connect(alice).swap(inputAmount, [priceFeedUpdateData], { value: ethers.utils.parseUnits("10", "wei") })
+                await pyth_swap.connect(alice).swap(inputAmount, [priceFeedUpdateData], { value: ethers.parseUnits("10", "wei") })
                 const outputAmount = Math.floor(inputAmount * price.price / 10**-price.expo)
                 expect (await output_token.balanceOf(alice.address)).to.equal(outputAmount)
             })
 
             it("should decrease contract outputToken balance by outputAmount", async () => {
-                await pyth_swap.connect(alice).swap(inputAmount, [priceFeedUpdateData], { value: ethers.utils.parseUnits("10", "wei") })
+                await pyth_swap.connect(alice).swap(inputAmount, [priceFeedUpdateData], { value: ethers.parseUnits("10", "wei") })
                 const outputAmount = Math.floor(inputAmount * price.price / 10**-price.expo)
-                expect (await output_token.balanceOf(pyth_swap.address)).to.equal(initialBalance - outputAmount)
+                expect (await output_token.balanceOf(pyth_swap.target)).to.equal(initialBalance - outputAmount)
             })
         })
     })

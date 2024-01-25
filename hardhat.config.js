@@ -1,12 +1,10 @@
-import { task } from "hardhat/config"
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers"
-import { BigNumber } from "ethers"
-import "@nomiclabs/hardhat-waffle"
-import '@nomiclabs/hardhat-etherscan'
-import 'hardhat-abi-exporter'
-import { APIKEY, TESTNETACCOUNT, MAINNETACCOUNT } from './.env.json'
-import "hardhat-interface-generator"
-import "hardhat-dependency-compiler"
+require("@nomicfoundation/hardhat-toolbox")
+require("@nomicfoundation/hardhat-ignition-ethers");
+require('hardhat-abi-exporter')
+require("hardhat-interface-generator")
+require("hardhat-dependency-compiler")
+
+const { vars } = require("hardhat/config");
 
 const FORK_FUJI = false
 const FORK_MAINNET = false
@@ -16,22 +14,9 @@ const forkingData = FORK_FUJI ? {
   url: 'https://api.avax.network/ext/bc/C/rpc'
 } : undefined
 
-task("accounts", "Prints the list of accounts", async (args, hre): Promise<void> => {
-  const accounts: SignerWithAddress[] = await hre.ethers.getSigners()
-  accounts.forEach((account: SignerWithAddress): void => {
-    console.log(account.address)
-  })
-})
-
-task("balances", "Prints the list of AVAX account balances", async (args, hre): Promise<void> => {
-  const accounts: SignerWithAddress[] = await hre.ethers.getSigners()
-  for(const account of accounts){
-    const balance: BigNumber = await hre.ethers.provider.getBalance(
-      account.address
-    );
-    console.log(`${account.address} has balance ${balance.toString()}`);
-  }
-})
+const APIKEY = vars.get('APIKEY', "")
+const TESTNETACCOUNT = vars.get('TESTNETACCOUNT', "c1ff50a970e7529a24ad552bac0b8d68e75aec98520f397a60152e3b9052b9bf")
+const MAINNETACCOUNT = vars.get('MAINNETACCOUNT')
 
 /**
  * @type import('hardhat/config').HardhatUserConfig

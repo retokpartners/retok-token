@@ -22,15 +22,15 @@ describe("SnapshotToken", () => {
         accessManager = await AccessManager.deploy(owner.address)
 
         SnapshotToken = await ethers.getContractFactory("SnapshotToken");
-        snapshotToken = await SnapshotToken.deploy('TestToken', 'TTK', accessManager.address);
+        snapshotToken = await SnapshotToken.deploy('TestToken', 'TTK', accessManager.target);
 
         // Roles and permissions
         await accessManager.grantRole(OWNER, owner.address, 0)
         await accessManager.setTargetFunctionRole(
-            snapshotToken.address,
+            snapshotToken.target,
             [
-                ethers.utils.id('burn(address,uint256,uint8)').substring(0, 10),
-                ethers.utils.id('mintTo(address,uint256,uint8)').substring(0, 10)
+                ethers.id('burn(address,uint256,uint8)').substring(0, 10),
+                ethers.id('mintTo(address,uint256,uint8)').substring(0, 10)
             ],
             OWNER
        )
@@ -39,7 +39,7 @@ describe("SnapshotToken", () => {
 
     describe("deployment", () => {
         it("should set the right manager", async function () {
-            expect(await snapshotToken.authority()).to.equal(accessManager.address);
+            expect(await snapshotToken.authority()).to.equal(accessManager.target);
         })
     })
 
@@ -61,7 +61,7 @@ describe("SnapshotToken", () => {
     })
 
     it("shouldn't allow a non-owner to mint", async () => {
-        await expect(snapshotToken.connect(bob).mintTo(alice.address, 10000, 0)).to.be.revertedWith("AccessManagedUnauthorized")
+        await expect(snapshotToken.connect(bob).mintTo(alice.address, 10000, 0)).to.be.revertedWithCustomError(snapshotToken, 'AccessManagedUnauthorized')
     })
 
     describe("once minted some tokens to alice", () => {
@@ -93,7 +93,7 @@ describe("SnapshotToken", () => {
         })
 
         it("shouldn't allow a transfer by a third party if the allowance is not sufficient", async () => {
-            await expect(snapshotToken.connect(broker).transferFrom(alice.address, bob.address, 2500)).to.be.revertedWith("ERC20InsufficientAllowance")
+            await expect(snapshotToken.connect(broker).transferFrom(alice.address, bob.address, 2500)).to.be.revertedWithCustomError(snapshotToken, "ERC20InsufficientAllowance")
         })
 
         it("should allow a transfer by a third party if the allowance is sufficient", async () => {
@@ -117,7 +117,7 @@ describe("SnapshotToken", () => {
         })
 
         it("shouldn't allow a non-owner to burn tokens", async () => {
-            await expect(snapshotToken.connect(alice).burn(alice.address, 10000, 1)).to.be.revertedWith("AccessManagedUnauthorized")
+            await expect(snapshotToken.connect(alice).burn(alice.address, 10000, 1)).to.be.revertedWithCustomError(snapshotToken, 'AccessManagedUnauthorized')
         })
 
         it("shouldn't allow to burn tokens with a non valid code", async () => {
@@ -125,7 +125,7 @@ describe("SnapshotToken", () => {
         })
 
         it("shouldn't allow to burn more tokens that there are", async () => {
-            await expect(snapshotToken.burn(alice.address, 1000001, 1)).to.be.revertedWith("panic code 0x11")
+            await expect(snapshotToken.burn(alice.address, 1000001, 1)).to.be.revertedWithPanic(0x11)
         })
 
         describe('snapshots', async () => {
@@ -134,16 +134,16 @@ describe("SnapshotToken", () => {
               // Roles and permissions
               await accessManager.grantRole(SNAPSHOOTER, chris.address, 0)
               await accessManager.setTargetFunctionRole(
-                snapshotToken.address,
+                snapshotToken.target,
                 [
-                    ethers.utils.id('snapshot()').substring(0, 10)
+                    ethers.id('snapshot()').substring(0, 10)
                 ],
                 SNAPSHOOTER
               )
             })
 
             it("shouldn't allow non-snapshoters to trigger snapshots", async () => {
-                await expect(snapshotToken.snapshot()).to.be.revertedWith("AccessManagedUnauthorized")
+                await expect(snapshotToken.snapshot()).to.be.revertedWithCustomError(snapshotToken, 'AccessManagedUnauthorized')
             })
 
             it("should allow snapshoters to trigger snapshots", async () => {
@@ -187,8 +187,8 @@ describe("SnapshotToken", () => {
                 let aliceBalance = await snapshotToken.balanceOfAt(alice.address, 2)
                 let bobBalance = await snapshotToken.balanceOfAt(bob.address, 2)
 
-                expect(await snapshotToken.shareOfAt(alice.address, 2)).to.equal(Math.floor(aliceBalance * 1000000 / totalSupply))
-                expect(await snapshotToken.shareOfAt(bob.address, 2)).to.equal(Math.floor(bobBalance * 1000000 / totalSupply))
+                expect(await snapshotToken.shareOfAt(alice.address, 2)).to.equal(aliceBalance * BigInt(1000000) / totalSupply)
+                expect(await snapshotToken.shareOfAt(bob.address, 2)).to.equal(bobBalance * BigInt(1000000) / totalSupply)
             })
 
         })
