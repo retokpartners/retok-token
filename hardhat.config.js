@@ -1,5 +1,4 @@
 require("@nomicfoundation/hardhat-toolbox")
-require("@nomicfoundation/hardhat-ignition-ethers");
 require('hardhat-abi-exporter')
 require("hardhat-interface-generator")
 require("hardhat-dependency-compiler")
@@ -16,7 +15,7 @@ const forkingData = FORK_FUJI ? {
 
 const APIKEY = vars.get('APIKEY', "")
 const TESTNETACCOUNT = vars.get('TESTNETACCOUNT', "c1ff50a970e7529a24ad552bac0b8d68e75aec98520f397a60152e3b9052b9bf")
-const MAINNETACCOUNT = vars.get('MAINNETACCOUNT')
+const MAINNETACCOUNT = vars.get('MAINNETACCOUNT', "c1ff50a970e7529a24ad552bac0b8d68e75aec98520f397a60152e3b9052b9bf")
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -51,13 +50,11 @@ module.exports = {
     },
     fuji: {
       url: 'https://api.avax-test.network/ext/bc/C/rpc',
-      gasPrice: 225000000000,
       chainId: 43113,
       accounts: [TESTNETACCOUNT]
     },
     mainnet: {
       url: 'https://api.avax.network/ext/bc/C/rpc',
-      gasPrice: 225000000000,
       chainId: 43114,
       accounts: [MAINNETACCOUNT]
     }
@@ -66,7 +63,7 @@ module.exports = {
     {
       path: './abi',
       pretty: false,
-      only: ['WhitelistToken.sol', 'Distributor.sol']
+      only: ['SnapshotToken.sol', 'Distributor.sol']
     }
   ],
   dependencyCompiler: {

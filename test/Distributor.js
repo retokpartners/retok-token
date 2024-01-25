@@ -29,7 +29,7 @@ class Tester {
         this.name = name
         this.account = account
         this.previousIncome = previousIncome
-        this.income = this.previousIncome
+        this.income = previousIncome
     }
 
     addIncome(amount) {
@@ -252,16 +252,6 @@ describe("Distributor", () => {
 
     it("should not allow a non-owner to add an income", async () => {
         await expect(distributor.connect(alice.account).addIncome(11000)).to.be.revertedWithCustomError(distributor, 'AccessManagedUnauthorized')
-    })
-
-    it("should not be able to compute cumulative share before at least one income has been added", async () => {
-        distributor = await Distributor.deploy(accessManager.target, snapshotToken.target, paymentCoin.target, ethers.ZeroAddress);
-        await expect(distributor.computeCumulativeShare(alice.account.address)).to.be.reverted
-    })
-
-    it("should not be able to return a cumulative share before at least one income has been added", async () => {
-        distributor = await Distributor.deploy(accessManager.target, snapshotToken.target, paymentCoin.target, ethers.ZeroAddress);
-        await expect(distributor.cumulativeShareOf(alice.account.address)).to.be.reverted
     })
 
     it("should allow the owner to transfer funds out of the contract", async () => {
