@@ -9,7 +9,7 @@
   "author": "Bruno Enten",
   "license": "ISC",
   "devDependencies": {
-    "@nomicfoundation/hardhat-ignition-ethers": "^0.13.0",
+    "@nomicfoundation/hardhat-ignition-ethers": "^0.13.2",
     "@nomicfoundation/hardhat-toolbox": "^4.0.0",
     "hardhat": "^2.19.0",
     "hardhat-abi-exporter": "^2.10.1",

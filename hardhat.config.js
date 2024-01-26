@@ -1,5 +1,5 @@
-require("@nomicfoundation/hardhat-toolbox")
 require("@nomicfoundation/hardhat-ignition-ethers");
+require("@nomicfoundation/hardhat-toolbox")
 require('hardhat-abi-exporter')
 require("hardhat-interface-generator")
 require("hardhat-dependency-compiler")
@@ -85,7 +85,7 @@ module.exports = {
     {
       path: './abi',
       pretty: false,
-      only: ['SnapshotToken.sol', 'Distributor.sol']
+      only: ['SnapshotToken.sol', 'Distributor.sol', 'AccessManager.sol']
     }
   ],
   dependencyCompiler: {
