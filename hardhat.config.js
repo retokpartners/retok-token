@@ -1,4 +1,5 @@
 require("@nomicfoundation/hardhat-toolbox")
+require("@nomicfoundation/hardhat-ignition-ethers");
 require('hardhat-abi-exporter')
 require("hardhat-interface-generator")
 require("hardhat-dependency-compiler")
@@ -13,7 +14,7 @@ const forkingData = FORK_FUJI ? {
   url: 'https://api.avax.network/ext/bc/C/rpc'
 } : undefined
 
-const APIKEY = vars.get('APIKEY', "")
+const APIKEY = vars.get('APIKEY', "snowtrace")
 const TESTNETACCOUNT = vars.get('TESTNETACCOUNT', "c1ff50a970e7529a24ad552bac0b8d68e75aec98520f397a60152e3b9052b9bf")
 const MAINNETACCOUNT = vars.get('MAINNETACCOUNT', "c1ff50a970e7529a24ad552bac0b8d68e75aec98520f397a60152e3b9052b9bf")
 
@@ -22,8 +23,29 @@ const MAINNETACCOUNT = vars.get('MAINNETACCOUNT', "c1ff50a970e7529a24ad552bac0b8
  */
 module.exports = {
   etherscan: {
-    apiKey: APIKEY,
+    apiKey: {
+      avalancheFujiTestnet: APIKEY,
+      avalanche: APIKEY
+    }
   },
+  customChains: [
+    {
+      network: "avalancheFujiTestnet",
+      chainId: 43113,
+      urls: {
+        apiURL: "https://api.routescan.io/v2/network/testnet/evm/43113/etherscan",
+        browserURL: "https://avalanche.testnet.routescan.io"
+      }
+    },
+    {
+      network: "avalanche",
+      chainId: 43114,
+      urls: {
+        apiURL: "https://api.routescan.io/v2/network/mainnet/evm/43114/etherscan",
+        browserURL: "https://avalanche.routescan.io"
+      }
+    }
+  ],
   solidity: "0.8.20",
   networks: {
     hardhat: {

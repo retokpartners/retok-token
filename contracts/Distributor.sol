@@ -15,10 +15,10 @@ contract Distributor is AccessManaged {
         uint40 amount;
     }
 
-    address public _tokenAddress;
-    address public _coinAddress;
+    address public immutable  _tokenAddress;
+    address public immutable  _coinAddress;
     uint40[] public _TotalIncomes;
-    address private _previousAddress;
+    address private immutable  _previousAddress;
     mapping(address => Income) public _splitIncomes;
 
     constructor(address manager, address tokenAddress, address coinAddress, address previousAddress) AccessManaged(manager) {

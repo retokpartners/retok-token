@@ -8,5 +8,7 @@ typechain
 cache
 artifacts
 contracts/hardhat-dependency-compiler
+ignition/deployments
 
 .env.json
+
