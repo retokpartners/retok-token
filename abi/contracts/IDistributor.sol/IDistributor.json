@@ -2,6 +2,80 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "_TotalIncomes",
+    "outputs": [
+      {
+        "internalType": "uint40",
+        "name": "",
+        "type": "uint40"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "_coinAddress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "_splitIncomes",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "importedAmountFromPrevious",
+        "type": "bool"
+      },
+      {
+        "internalType": "uint16",
+        "name": "snapshotId",
+        "type": "uint16"
+      },
+      {
+        "internalType": "uint40",
+        "name": "amount",
+        "type": "uint40"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "_tokenAddress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint40",
         "name": "amount",
         "type": "uint40"
@@ -10,6 +84,19 @@
     "name": "addIncome",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "authority",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -46,33 +133,26 @@
   },
   {
     "inputs": [],
-    "name": "owner",
+    "name": "isConsumingScheduledOp",
     "outputs": [
       {
-        "internalType": "address",
+        "internalType": "bytes4",
         "name": "",
-        "type": "address"
+        "type": "bytes4"
       }
     ],
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "renounceOwnership",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
         "internalType": "address",
-        "name": "newOwner",
+        "name": "newAuthority",
         "type": "address"
       }
     ],
-    "name": "transferOwnership",
+    "name": "setAuthority",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
