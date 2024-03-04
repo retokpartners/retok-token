@@ -16,7 +16,7 @@
     "hardhat-interface-generator": "brunoenten/hardhat-interface-generator#build"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^5.0.0",
+    "@openzeppelin/contracts": "^5.0.2",
     "@pythnetwork/pyth-sdk-solidity": "^2.2.0",
     "hardhat-dependency-compiler": "^1.1.3"
   }
